@@ -1615,6 +1615,15 @@ func validateVolumes(field *k8sfield.Path, volumes []v1.Volume, config *virtconf
 		}
 		if volume.Ephemeral != nil {
 			volumeSourceSetCount++
+			if volume.Ephemeral.Capacity != nil {
+				if volume.Ephemeral.Capacity.Cmp(resource.MustParse("0")) <= 0 {
+					causes = append(causes, metav1.StatusCause{
+						Type:    metav1.CauseTypeFieldValueInvalid,
+						Message: fmt.Sprintf("%s capacity must be a positive value", field.Child("ephemeral", "capacity").String()),
+						Field:   field.Child("ephemeral", "capacity").String(),
+					})
+				}
+			}
 		}
 		if volume.EmptyDisk != nil {
 			volumeSourceSetCount++
