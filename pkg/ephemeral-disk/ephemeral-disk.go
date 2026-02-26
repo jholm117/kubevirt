@@ -154,8 +154,9 @@ func createBackingDisk(backingFile string, backingFormat string, imagePath strin
 		imagePath,
 	}
 	if capacity != nil {
-		// qemu-img accepts size in bytes
-		args = append(args, fmt.Sprintf("%d", capacity.Value()))
+		// Use decimal string representation to avoid int64 overflow for large capacities.
+		// qemu-img accepts decimal byte values as the size argument.
+		args = append(args, capacity.AsDec().String())
 	}
 	// #nosec No risk for attacker injection. Parameters are predefined strings
 	cmd := exec.Command("qemu-img", args...)
